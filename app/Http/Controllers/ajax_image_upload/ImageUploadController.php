@@ -37,4 +37,5 @@ class ImageUploadController extends Controller
         $image = Photo::latest()->first(['photo_name']);
         return Response()->json($image);
     }
+ 
 }

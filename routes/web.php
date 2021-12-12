@@ -35,8 +35,27 @@ Route::get('/student/alldata', [App\Http\Controllers\studentController::class, '
 
 Route::POST('/student/store', [App\Http\Controllers\studentController::class, 'storeData']);
 
+Route::get('/student/edit/{id}', [App\Http\Controllers\studentController::class, 'DataEdit']);
+
+Route::POST('/student/update', [App\Http\Controllers\studentController::class, 'updateData']);
+
 Route::get('ajax-image-upload',  [App\Http\Controllers\ajax_image_upload\ImageUploadController::class,'index']);
 Route::post('ajax-image-upload', [App\Http\Controllers\ajax_image_upload\ImageUploadController::class,'store']);
+
+
+
+use App\Http\Controllers\ImageController;
+
+
+Route::get('upload-images', [ ImageController::class, 'index' ]);
+Route::post('upload-images', [ ImageController::class, 'storeImage' ])->name('images.store');
+
+Route::get('/fetch-image', [ ImageController::class, 'fetchImage' ]);
+Route::get('/edit-image/{id}', [ ImageController::class, 'editImage' ]);
+Route::post('/update', [ ImageController::class, 'updateImage' ]);
+
+
+Route::post('/delete/{id}', [ ImageController::class, 'deleteImage' ]);
 
 // Route::group(['prefix' => 'admin','middleware'=>['admin','auth'],'namespace'=>'admin'], function () {
 //     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('admin.dashbord');

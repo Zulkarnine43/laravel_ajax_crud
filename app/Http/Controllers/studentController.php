@@ -17,15 +17,15 @@ class studentController extends Controller
     public function StudentallData()
     {
         $data = student::orderBy('id','DESC')->get();
-        return response()->json($data);
+        return response()->json([
+            'images'=>$data
+        ]);
     }
 
     public function storeData(Request $request){
-
         $request->validate([
             'name' =>'required',
-            'email' =>'required',
-            'photo' =>'required',
+            'email' =>'required'
         ]);
 
         $Image = $request->file('photo');
@@ -43,5 +43,32 @@ class studentController extends Controller
               'photo' =>$imageUrl,
           ]);
           return response()->json('uploaded successfully');
+      }
+
+      public function DataEdit($id){
+        $data = student::findOrFail($id);
+        return response()->json($data);
+       }
+
+       public function updateData(Request $request){
+
+        $Image = $request->file('photo');
+        if ($Image) {
+            $currentTimeinSeconds = time();  
+            $imageName =  $currentTimeinSeconds.'.'.$Image->getClientOriginalName();
+            $directory = 'public/images/';
+            $imageUrl = $directory.$imageName;
+            
+            $Image->move($directory, $imageName);
+        }
+   
+        $data = student::find($request->id);
+        $data->name=$request->name;
+        $data->email=$request->email;
+        $data->photo=$imageUrl;
+        $data->save();
+
+        return response()->json($data);
+    
       }
 }

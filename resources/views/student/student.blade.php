@@ -12,7 +12,7 @@
   <title>Student</title>
   </head>
   <body>
-      <div style="padding:30px"></div>
+  <div style="padding:30px"></div>
     <div class="row">
         <div class="col-sm-1"></div>
         <div class="col-sm-6">
@@ -42,12 +42,13 @@
             </div>
           </div>
         </div>
+
         <div class="col-sm-4">
           <div class="card">
             <div class="card-body">
               <h5 class="card-title"><span id="addT">Add Student</span> <span id="updateT">Update Student</span></h5>
 
-              <form method="post" id="FrmUpload" action="javascript:void(0)" enctype="multipart/form-data">
+              <form method="post" id="FrmUpload" class="FrmUpdate"  enctype="multipart/form-data">
                 @csrf
                         <div class="mb-3">
                           <label for="exampleInputEmail1" class="form-label">Student Name</label>
@@ -65,15 +66,24 @@
                           <input type="file" class="form-control" id="photo" name="photo" aria-describedby="photoHelp">
                           <span class="text-danger" id="photoError"> </span>
                       </div>
-                      <input type="hidden" id="id">
+
+                      <div class="row" id="newImg">
+                        <div class="col-md-8">
+                             <strong>Original Image:</strong>
+                             <br/>
+                             <img id="ImgOri" src=""  height="100px" width="300px"/>
+                       </div>
+                       
+                  </div>
+
+                      <input type="hidden" name="id" id="id">
                       <button  id="addButton" type="submit" id="submit" class="btn btn-primary">Add</button>
-                      <button id="updateButton" onclick='updatData();'class="btn btn-primary">Update</button>
-                      
+                      <button  id="updateButton" type="submit" id="submit" class="btn btn-primary">Update</button>
+                
                </form>
             </div>
           </div>
         </div>
-        <div class="col-sm-1"></div>
       </div>
 
 <script>
@@ -81,56 +91,75 @@
       $('#addButton').show();
       $('#updateT').hide();
       $('#updateButton').hide();
+      $('#newImg').hide();
 
       $.ajaxSetup({
         headers:{
           'X-CSRF-TOKEN':$('meta[name="csrf-token"]').attr('content')
         }
-      }) ;           
-
-      function getAllData(){
-           $.ajax({
-             type:"GET",
-             dataType:'json',
-             url:"/student/alldata",
-             success:function(response){
-                     //ajax  ae foreach korar niyom
-                   var  data = ""
-                   $.each(response,function(key,value){
-                      // console.log(value.name); korar niyom
-                      data = data + "<tr>"
-                        data = data + "<td>"+value.id+"</td>"
-                        data = data + "<td>"+value.name+"</td>"
-                        data = data + "<td>"+value.email+"</td>"
-                        data = data + "<td><img src="+value.photo+" alt="+value.photo+"></td>"
-                        data = data + "<td>"
-                        data = data + "<button class='btn btn-success'>Edit</button>"
-                        data = data + "<button class='btn btn-danger '>Delete</button>"
-                        data = data + "</td>"
-                      data = data + "</tr>"
-                    })
-                   $('tbody').html(data);
-                  }
-           });
-      }
-
-  getAllData();
+      }) ;  
 
 
-$(document).ready(function (e) {
- 
+        
+
+
+    function StudentallData(){
+      $.ajax({
+        type:"GET",
+        url:"/student/alldata",
+        dataType:"json",
+        success: function(response){
+          StudentallData();
+
+          $('tbody').html("");
+          $.each(response.images, function(key, item){
+            $('tbody').append('<tr>\
+                        <td>'+item.id+'</td>\
+                        <td>'+item.name+'</td>\
+                        <td>'+item.email+'</td>\
+                        <td><img src="'+item.photo+'"width="50px" height="50px" alt="Image"></td>\
+                        <td><button type="button" class="edit_btn btn btn-success" onclick="editData('+item.id+')">Edit</button></td>\
+                        <td><button type="button" value="" class="delete_btn btn btn-danger btn-sm">Delete</button></td>\
+                      </tr>');
+          });
+          
+        }
+      });
+    }     
+
+
+    StudentallData();  
+
+  //     function getAllData(){
+  //          $.ajax({
+  //            type:"GET",
+  //            dataType:'json',
+  //            url:"/student/alldata",
+  //            success:function(response){
+  //                    //ajax  ae foreach korar niyom
+  //                  var  data = ""
+  //                  $.each(response.images,function(key,value){
+  //                     // console.log(value.name); korar niyom
+  //                     data = data + "<tr>"
+  //                       data = data + "<td>"+value.id+"</td>"
+  //                       data = data + "<td>"+value.name+"</td>"
+  //                       data = data + "<td>"+value.email+"</td>"
+  //                       data = data + "<td><img src="public/ '+value.photo+'" alt="+value.photo+"></td>"
+  //                       data = data + "<td>"
+  //                       data = data + "<button class='btn btn-success'>Edit</button>"
+  //                       data = data + "<button class='btn btn-danger '>Delete</button>"
+  //                       data = data + "</td>"
+  //                     data = data + "</tr>"
+  //                   })
+  //                  $('tbody').html(data);
+  //                 }
+  //          });
+  //     }
+
+  // getAllData();
+
+
  $('#FrmUpload').on('submit',(function(e) {
-  
- $.ajaxSetup({
-  
- headers: {
-  
-   'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-  
- }
-  
- });
-  
  e.preventDefault();
   
  var formData = new FormData(this);
@@ -139,7 +168,7 @@ $(document).ready(function (e) {
   
     type:'POST',
   
-    url: "{{url('/student/store')}}",
+    url: "student/store",
   
     data:formData,
   
@@ -150,7 +179,7 @@ $(document).ready(function (e) {
     processData: false,
   
     success:function(data){
-      getAllData();
+       StudentallData();  
       alert('Data has been uploaded successfully');
   
     },
@@ -165,7 +194,67 @@ $(document).ready(function (e) {
   
  }));
   
+
+
+ function editData(id){
+          // $('addButton').val('update')
+           $.ajax({
+               type:"GET",
+               dataType:"json",
+               url: "/student/edit/"+id,
+               success:function(data){
+                    $('#name').val(data.name);
+                    $('#email').val(data.email);
+                    $('#id').val(data.id);
+                    $('#ImgOri').attr('src',data.photo);
+
+                    $('#addT').hide();
+                    $('#addButton').hide();
+                    $('#updateT').show();
+                    $('#updateButton').show();
+                    $('#newImg').show();
+               }
+           })
+          }
+   //edit korar jonno end==============
+
+  
+ $('.FrmUpdate').on('submit',(function(e) {
+ e.preventDefault();
+  
+ var formData = new FormData(this);
+  
+ $.ajax({
+  
+    type:'POST',
+  
+    url: "/student/update",
+  
+    data:formData,
+  
+    cache:false,
+  
+    contentType: false,
+  
+    processData: false,
+  
+     success:function(data){
+      StudentallData();    
+      alert('Data has been updated successfully');
+  
+    },
+  
+    error: function(data){
+  
+        console.log(data);
+  
+    }
+  
  });
+  
+ }));
+  
+
 
 </script>
 
